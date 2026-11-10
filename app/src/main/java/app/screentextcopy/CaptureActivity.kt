@@ -1,5 +1,6 @@
 package app.screentextcopy
 
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -154,7 +155,7 @@ class CaptureActivity : AppCompatActivity() {
         val root = FrameLayout(this)
 
         selectionView = SelectionView(this).apply {
-            onSelectionChanged = { has -> actionBar.visibility = if (has) View.VISIBLE else View.GONE }
+            onSelectionChanged = { has -> if (has) showActionBar() else actionBar.visibility = View.GONE }
         }
         root.addView(selectionView, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
@@ -179,22 +180,27 @@ class CaptureActivity : AppCompatActivity() {
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP
         ).apply { setMargins(dp(16), dp(36), dp(16), 0) })
 
-        // Bottom: actions for the current selection.
-        val bottom = LinearLayout(this).apply {
+        // Floating actions placed right under (or above) the selection, with a glow.
+        val bar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
-            background = pill(240)
-            setPadding(dp(6), dp(4), dp(6), dp(4))
+            background = barBackground
+            setPadding(dp(6), dp(2), dp(6), dp(2))
+            elevation = dp(14).toFloat()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                outlineSpotShadowColor = Color.rgb(120, 170, 255)
+                outlineAmbientShadowColor = Color.rgb(120, 170, 255)
+            }
             visibility = View.GONE
         }
-        bottom.addView(barButton("Copy") { copy() })
-        bottom.addView(barButton("Share") { share() })
-        bottom.addView(barButton("Select all") { selectionView.selectAll() })
-        actionBar = bottom
-        root.addView(bottom, FrameLayout.LayoutParams(
+        bar.addView(barButton("Copy") { copy() })
+        bar.addView(barButton("Share") { share() })
+        bar.addView(barButton("Select all") { selectionView.selectAll() })
+        actionBar = bar
+        root.addView(bar, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
-            Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-        ).apply { setMargins(0, 0, 0, dp(48)) })
+            Gravity.TOP or Gravity.START
+        ))
 
         setContentView(root)
     }
@@ -207,6 +213,58 @@ class CaptureActivity : AppCompatActivity() {
             minWidth = dp(64)
             setOnClickListener { action() }
         }
+
+    private val barBackground by lazy {
+        GradientDrawable().apply {
+            cornerRadius = dp(24).toFloat()
+            setColor(Color.argb(250, 72, 108, 184))
+            setStroke(dp(2), Color.rgb(207, 224, 255))
+        }
+    }
+
+    private var glowAnimator: ValueAnimator? = null
+
+    /** Shows the action bar just below the selection, or above it when there is no room. */
+    private fun showActionBar() {
+        val bounds = selectionView.selectionBounds() ?: return
+        val bar = actionBar
+        bar.measure(
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+        val w = bar.measuredWidth.toFloat()
+        val h = bar.measuredHeight.toFloat()
+        val screenW = selectionView.width.toFloat()
+        val screenH = selectionView.height.toFloat()
+        val margin = dp(12).toFloat()
+
+        var y = bounds.bottom + dp(8)
+        if (y + h > screenH - dp(24)) y = bounds.top - h - dp(14)
+        if (y < dp(96)) y = (screenH - h) / 2f // very tall selection: keep it on screen
+        val maxX = (screenW - w - margin).coerceAtLeast(margin)
+        val x = (bounds.centerX() - w / 2f).coerceIn(margin, maxX)
+
+        bar.x = x
+        bar.y = y
+        bar.visibility = View.VISIBLE
+        pulseGlow()
+    }
+
+    /** A short glowing pulse on the bar's border so it stands out on any background. */
+    private fun pulseGlow() {
+        glowAnimator?.cancel()
+        glowAnimator = ValueAnimator.ofFloat(0f, 1f, 0f, 1f, 0.4f).apply {
+            duration = 1400
+            addUpdateListener {
+                val t = it.animatedValue as Float
+                val width = dp(2) + (dp(3) * t).toInt()
+                val c = Color.rgb(207 + (48 * t).toInt(), 224 + (31 * t).toInt(), 255)
+                barBackground.setStroke(width, c)
+                actionBar.elevation = dp(10) + dp(14) * t
+            }
+            start()
+        }
+    }
 
     private fun setStatus(text: String, busy: Boolean) {
         statusText.text = text

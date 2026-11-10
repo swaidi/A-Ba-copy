@@ -116,6 +116,17 @@ class SelectionView(context: Context) : View(context) {
         onSelectionChanged?.invoke(false)
     }
 
+    /** Bounds of the selected words in view coordinates, including the handles. */
+    fun selectionBounds(): RectF? {
+        if (!hasSelection()) return null
+        val r = RectF(words[selStart].box)
+        for (i in selStart..selEnd) r.union(words[i].box)
+        return RectF(
+            r.left * scaleX(), r.top * scaleY(),
+            r.right * scaleX(), r.bottom * scaleY() + 26 * density
+        )
+    }
+
     fun selectedText(): String {
         if (!hasSelection()) return ""
         return Word.join(words.subList(selStart, selEnd + 1))
@@ -222,13 +233,17 @@ class SelectionView(context: Context) : View(context) {
                     val e = handleCenter(endAnchor())
                     val ds = hypot(x - s.x, y - s.y)
                     val de = hypot(x - e.x, y - e.y)
-                    if (ds < grab || de < grab) mode = if (ds <= de) Mode.DRAG_START else Mode.DRAG_END
+                    if (ds < grab || de < grab) {
+                        mode = if (ds <= de) Mode.DRAG_START else Mode.DRAG_END
+                        onSelectionChanged?.invoke(false) // hide the action bar while dragging
+                    }
                 }
             }
             MotionEvent.ACTION_MOVE -> when (mode) {
                 Mode.DRAG_START, Mode.DRAG_END -> dragHandle(x, y)
                 Mode.PENDING -> if (hypot(x - downX, y - downY) > slop) {
                     mode = Mode.LASSO
+                    onSelectionChanged?.invoke(false)
                     lasso.reset()
                     lassoPoints.clear()
                     lasso.moveTo(downX, downY)
@@ -356,6 +371,8 @@ class SelectionView(context: Context) : View(context) {
             selEnd = max(first, last)
             performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
             onSelectionChanged?.invoke(true)
+        } else {
+            onSelectionChanged?.invoke(hasSelection())
         }
     }
 }
