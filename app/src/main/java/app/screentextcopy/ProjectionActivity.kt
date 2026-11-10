@@ -38,7 +38,10 @@ class ProjectionActivity : Activity() {
             CaptureHolder.onProjectionResult = null
             if (bitmap != null) {
                 CaptureHolder.bitmap = bitmap
-                startActivity(Intent(this, CaptureActivity::class.java))
+                CaptureHolder.directWords = emptyList()
+                startActivity(
+                    Intent(this, CaptureActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                )
             } else {
                 Toast.makeText(this, "Screen capture failed", Toast.LENGTH_SHORT).show()
             }

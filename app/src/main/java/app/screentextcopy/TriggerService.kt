@@ -2,6 +2,7 @@ package app.screentextcopy
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
@@ -165,6 +166,14 @@ class TriggerService : AccessibilityService(), SharedPreferences.OnSharedPrefere
         if (now - lastCaptureAt < 1100) return
         lastCaptureAt = now
 
+        // Read the apps' own text first, while the original screen is still showing.
+        val bounds = windowManager?.currentWindowMetrics?.bounds
+        CaptureHolder.directWords = try {
+            if (bounds != null) DirectText.collect(this, bounds.width(), bounds.height()) else emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
+
         strip?.visibility = View.INVISIBLE
         takeScreenshot(
             android.view.Display.DEFAULT_DISPLAY,
@@ -199,7 +208,12 @@ class TriggerService : AccessibilityService(), SharedPreferences.OnSharedPrefere
     private fun openCapture(bitmap: Bitmap) {
         CaptureHolder.bitmap = bitmap
         val intent = Intent(this, CaptureActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        startActivity(intent)
+            .addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_NO_ANIMATION
+            )
+        // No slide-in: the frozen screen appears exactly in place.
+        val options = ActivityOptions.makeCustomAnimation(this, 0, 0)
+        startActivity(intent, options.toBundle())
     }
 }

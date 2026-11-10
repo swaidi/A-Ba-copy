@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -28,12 +28,12 @@ jobs:
         with:
           gradle-version: "8.11.1"
 
-      - name: Download OCR models (English and Arabic, fast variants)
+      - name: Download OCR models (English and Arabic, high-accuracy variants)
         run: |
           mkdir -p app/src/main/assets/tessdata
           for lang in eng ara; do
             curl -fsSL -o "app/src/main/assets/tessdata/$lang.traineddata" \
-              "https://github.com/tesseract-ocr/tessdata_fast/raw/main/$lang.traineddata"
+              "https://github.com/tesseract-ocr/tessdata_best/raw/main/$lang.traineddata"
           done
           ls -l app/src/main/assets/tessdata
 

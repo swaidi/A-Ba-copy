@@ -53,6 +53,10 @@ object CaptureHolder {
     @Volatile
     var bitmap: Bitmap? = null
 
+    /** Text read directly from the apps on screen, captured just before the screenshot. */
+    @Volatile
+    var directWords: List<Word> = emptyList()
+
     /** Called by the projection service once a frame is ready (main thread). */
     var onProjectionResult: ((Bitmap?) -> Unit)? = null
 }
