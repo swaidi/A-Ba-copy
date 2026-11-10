@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginTop="16dp"
+            android:contentDescription="@string/app_name"
+            android:src="@mipmap/ic_launcher" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/app_name"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+
+        <TextView
+            android:id="@+id/version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <!-- Service status -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Bottom-edge trigger service" />
+
+        <TextView
+            android:id="@+id/serviceStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBodyLarge" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/openAccessibility"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Open accessibility settings" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="If the switch is greyed out: Settings → Apps → Screen Text Copy → ⋮ menu → Allow restricted settings, then try again."
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <!-- Trigger strip -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Trigger strip" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/stripEnabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Long-press the bottom edge to capture" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/stripVisible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show strip outline (for adjusting)" />
+
+        <TextView
+            android:id="@+id/heightLabel"
+            style="@style/SliderLabel" />
+
+        <SeekBar
+            android:id="@+id/height"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="40"
+            android:min="8" />
+
+        <TextView
+            android:id="@+id/offsetLabel"
+            style="@style/SliderLabel" />
+
+        <SeekBar
+            android:id="@+id/offset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="80"
+            android:min="0" />
+
+        <TextView
+            android:id="@+id/widthLabel"
+            style="@style/SliderLabel" />
+
+        <SeekBar
+            android:id="@+id/width"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:min="20" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Keep the strip just above the navigation handle so the home gesture still works. Taps on the strip itself are blocked."
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <!-- Quick Settings -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Quick Settings tiles" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/toggleTile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quick toggle: turn the trigger service off in one tap" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/captureTile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fallback trigger: capture tile (works without the service)" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="After enabling a tile, pull down Quick Settings, tap the edit (pencil) button and drag the tile into place."
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <!-- Recognition -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Text recognition" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/arabic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Recognize Arabic as well as English" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/testCapture"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Test capture" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:text="All recognition happens on this phone. The app has no internet permission. Updates are delivered through Obtainium."
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+    </LinearLayout>
+</ScrollView>
