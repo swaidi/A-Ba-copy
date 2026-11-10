@@ -24,7 +24,7 @@
         <item name="android:textAppearance">?attr/textAppearanceBodyMedium</item>
     </style>
 
-    <style name="Theme.ScreenTextCopy.Capture"parent="Theme.ScreenTextCopy">
+    <style name="Theme.ScreenTextCopy.Capture" parent="Theme.ScreenTextCopy">
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowAnimationStyle">@null</item>
