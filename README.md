@@ -35,7 +35,7 @@ Long-press a thin strip at the bottom edge of the screen, then tap or circle any
 
 ## Obtainium (updates)
 
-Add app → App source URL: `https://github.com/swaidi/A-Ba-copy` → Add.
+Add app → App source URL: `https://github.com/swaidi/Alef-B-scan` → Add.
 
 ## Build
 
