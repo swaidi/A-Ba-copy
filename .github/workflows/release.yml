@@ -28,13 +28,13 @@ jobs:
         with:
           gradle-version: "8.11.1"
 
-      - name: Download OCR models (English and Arabic, high-accuracy variants)
+      - name: Download OCR models (fast English, high-accuracy Arabic)
         run: |
           mkdir -p app/src/main/assets/tessdata
-          for lang in eng ara; do
-            curl -fsSL -o "app/src/main/assets/tessdata/$lang.traineddata" \
-              "https://github.com/tesseract-ocr/tessdata_best/raw/main/$lang.traineddata"
-          done
+          curl -fsSL -o app/src/main/assets/tessdata/eng.traineddata \
+            "https://github.com/tesseract-ocr/tessdata_fast/raw/main/eng.traineddata"
+          curl -fsSL -o app/src/main/assets/tessdata/ara.traineddata \
+            "https://github.com/tesseract-ocr/tessdata_best/raw/main/ara.traineddata"
           ls -l app/src/main/assets/tessdata
 
       - name: Restore signing key
@@ -57,7 +57,7 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/ScreenTextCopy-v1.0.${VERSION_CODE}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "dist/Alef_B_scan-v1.0.${VERSION_CODE}.apk"
 
       - name: Keep APK as a build artifact (test builds)
         uses: actions/upload-artifact@v4
@@ -70,6 +70,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: Screen Text Copy v1.0.${{ github.run_number }}
+          name: Alef_B_scan v1.0.${{ github.run_number }}
           body: Automatic build from commit ${{ github.sha }}.
           files: dist/*.apk

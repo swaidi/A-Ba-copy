@@ -15,5 +15,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ScreenTextCopy"
+rootProject.name = "Alef_B_scan"
 include(":app")

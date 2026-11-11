@@ -53,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="If the switch is greyed out: Settings → Apps → Screen Text Copy → ⋮ menu → Allow restricted settings, then try again."
+            android:text="If the switch is greyed out: Settings → Apps → Alef_B_scan → ⋮ menu → Allow restricted settings, then try again."
             android:textAppearance="?attr/textAppearanceBodySmall" />
 
         <!-- Trigger strip -->

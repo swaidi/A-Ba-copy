@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand_bg">#486CB8</color>
+    <color name="brand_bg">#486196</color>
     <color name="brand_accent">#0B4662</color>
 
     <style name="Theme.ScreenTextCopy" parent="Theme.Material3.DayNight.NoActionBar">

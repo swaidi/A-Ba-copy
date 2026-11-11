@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Screen Text Copy</string>
-    <string name="service_label">Screen Text Copy trigger</string>
+    <string name="app_name">Alef_B_scan</string>
+    <string name="service_label">Alef_B_scan trigger</string>
     <string name="service_description">Shows a thin invisible strip at the bottom of the screen. Long-press it to capture the screen and copy text from it. Text recognition runs only on this device; nothing is uploaded.</string>
     <string name="tile_toggle_label">Text Copy trigger</string>
     <string name="tile_capture_label">Copy screen text</string>

@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         status.text = if (TriggerService.instance != null) {
             "On — long-press the bottom edge to copy text."
         } else {
-            "Off — enable \"Screen Text Copy trigger\" in Accessibility settings."
+            "Off — enable \"Alef_B_scan trigger\" in Accessibility settings."
         }
     }
 
