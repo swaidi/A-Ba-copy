@@ -19,6 +19,11 @@ android {
         targetSdk = 35
         versionCode = ciVersionCode
         versionName = "1.0.$ciVersionCode"
+
+        // Pixel phones are 64-bit ARM; leaving out other processor types removes most of the size.
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     signingConfigs {
@@ -34,7 +39,10 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Remove unused code and resources.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = if (hasReleaseKey) {
                 signingConfigs.getByName("release")
             } else {
@@ -43,9 +51,12 @@ android {
         }
     }
 
-    // Keep OCR model files uncompressed so they copy quickly on first run.
-    androidResources {
-        noCompress += "traineddata"
+    // Store native libraries compressed in the APK (smaller download).
+    // OCR model files are compressed too; they are unpacked once on first run.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 
     compileOptions {

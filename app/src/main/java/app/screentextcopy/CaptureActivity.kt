@@ -154,7 +154,14 @@ class CaptureActivity : AppCompatActivity() {
         val root = FrameLayout(this)
 
         selectionView = SelectionView(this).apply {
-            onSelectionChanged = { has -> if (has) showActionBar() else actionBar.visibility = View.GONE }
+            onSelectionChanged = { has ->
+                if (has) {
+                    resetExpand()
+                    showActionBar()
+                } else {
+                    actionBar.visibility = View.GONE
+                }
+            }
         }
         root.addView(selectionView, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
@@ -187,7 +194,9 @@ class CaptureActivity : AppCompatActivity() {
         }
         bar.addView(barButton("Copy") { copy() })
         bar.addView(barButton("Share") { share() })
-        bar.addView(barButton("Select all") { selectionView.selectAll() })
+        expandButton = barButton("Sentence") { expandSelection() }
+        bar.addView(expandButton)
+        bar.addView(barButton("All screen") { selectionView.selectAll() })
         actionBar = bar
         root.addView(bar, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -202,9 +211,35 @@ class CaptureActivity : AppCompatActivity() {
             text = label
             setTextColor(Color.WHITE)
             isAllCaps = false
-            minWidth = dp(64)
+            minWidth = dp(48)
+            minimumWidth = dp(48)
+            setPadding(dp(12), paddingTop, dp(12), paddingBottom)
             setOnClickListener { action() }
         }
+
+    // ---------- Step-by-step selection: word → sentence → paragraph ----------
+
+    private lateinit var expandButton: Button
+    private var expandLevel = 0 // 0 = as selected, 1 = sentence, 2 = paragraph
+
+    private fun resetExpand() {
+        expandLevel = 0
+        expandButton.text = "Sentence"
+        expandButton.visibility = if (selectionView.isAllSelected()) View.GONE else View.VISIBLE
+    }
+
+    private fun expandSelection() {
+        if (expandLevel == 0 && selectionView.expandToSentence()) {
+            expandLevel = 1
+            expandButton.text = "Paragraph"
+        } else {
+            // Already a full sentence (or second tap): go to the whole paragraph.
+            selectionView.expandToParagraph()
+            expandLevel = 2
+            expandButton.visibility = View.GONE
+        }
+        showActionBar()
+    }
 
     /** Shows the action bar just below the selection, or above it when there is no room. */
     private fun showActionBar() {

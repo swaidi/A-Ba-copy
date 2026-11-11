@@ -116,6 +116,41 @@ class SelectionView(context: Context) : View(context) {
         onSelectionChanged?.invoke(false)
     }
 
+    fun isAllSelected() = words.isNotEmpty() && selStart == 0 && selEnd == words.size - 1
+
+    /**
+     * Grows the selection to the whole sentence(s) it touches, staying inside the paragraph.
+     * Returns false when the selection was already a full sentence.
+     */
+    fun expandToSentence(): Boolean {
+        if (!hasSelection()) return false
+        var s = selStart
+        while (s > 0 && words[s - 1].para == words[s].para && !words[s - 1].endsSentence) s--
+        var e = selEnd
+        while (!words[e].endsSentence && e + 1 < words.size && words[e + 1].para == words[e].para) e++
+        val changed = s != selStart || e != selEnd
+        selStart = s
+        selEnd = e
+        invalidate()
+        return changed
+    }
+
+    /** Grows the selection to the whole paragraph(s) it touches. */
+    fun expandToParagraph(): Boolean {
+        if (!hasSelection()) return false
+        val firstPara = words[selStart].para
+        val lastPara = words[selEnd].para
+        var s = selStart
+        while (s > 0 && words[s - 1].para == firstPara) s--
+        var e = selEnd
+        while (e + 1 < words.size && words[e + 1].para == lastPara) e++
+        val changed = s != selStart || e != selEnd
+        selStart = s
+        selEnd = e
+        invalidate()
+        return changed
+    }
+
     /** Bounds of the selected words in view coordinates, including the handles. */
     fun selectionBounds(): RectF? {
         if (!hasSelection()) return null

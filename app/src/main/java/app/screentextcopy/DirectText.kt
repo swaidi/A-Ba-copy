@@ -66,12 +66,15 @@ object DirectText {
             // No per-character positions: offer the whole element as one selectable block.
             val clean = text.trim()
             if (clean.length <= 600) {
-                out.add(Word(clean, RectF(nodeBounds), LineIds.newId(), fromImage = false))
+                val id = LineIds.newId()
+                out.add(Word(clean, RectF(nodeBounds), id, id, fromImage = false))
             }
             return
         }
 
         val visible = RectF(nodeBounds)
+        // Each text element starts a paragraph; a line break inside its text starts another.
+        var para = LineIds.newId()
         var line = LineIds.newId()
         var prev: RectF? = null
         var newlineSincePrev = false
@@ -98,10 +101,15 @@ object DirectText {
             val p = prev
             if (p != null) {
                 val sameRow = abs(p.centerY() - box.centerY()) < 0.6f * min(p.height(), box.height())
-                if (newlineSincePrev || !sameRow) line = LineIds.newId()
+                if (newlineSincePrev) {
+                    para = LineIds.newId()
+                    line = LineIds.newId()
+                } else if (!sameRow) {
+                    line = LineIds.newId()
+                }
             }
             newlineSincePrev = false
-            out.add(Word(match.value, box, line, fromImage = false))
+            out.add(Word(match.value, box, line, para, fromImage = false))
             prev = box
         }
     }

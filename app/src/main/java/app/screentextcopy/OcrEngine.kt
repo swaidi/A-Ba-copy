@@ -12,6 +12,7 @@ import java.io.File
 /** Offline text recognition with Tesseract (high-accuracy English and Arabic models in the APK). */
 object OcrEngine {
     private const val MIN_CONFIDENCE = 45f
+    private const val MIN_CONFIDENCE_RTL = 30f
 
     private var api: TessBaseAPI? = null
     private var loadedLanguages: String? = null
@@ -92,18 +93,24 @@ object OcrEngine {
             if (it != null) {
                 try {
                     it.begin()
+                    var para = LineIds.newId()
                     var line = LineIds.newId()
                     var first = true
                     do {
-                        if (!first && it.isAtBeginningOf(TessBaseAPI.PageIteratorLevel.RIL_TEXTLINE)) {
+                        if (!first && it.isAtBeginningOf(TessBaseAPI.PageIteratorLevel.RIL_PARA)) {
+                            para = LineIds.newId()
+                            line = LineIds.newId()
+                        } else if (!first && it.isAtBeginningOf(TessBaseAPI.PageIteratorLevel.RIL_TEXTLINE)) {
                             line = LineIds.newId()
                         }
                         first = false
                         val text = it.getUTF8Text(TessBaseAPI.PageIteratorLevel.RIL_WORD)?.trim()
                         val conf = it.confidence(TessBaseAPI.PageIteratorLevel.RIL_WORD)
                         val rect = it.getBoundingRect(TessBaseAPI.PageIteratorLevel.RIL_WORD)
-                        if (!text.isNullOrEmpty() && conf >= MIN_CONFIDENCE && rect != null && !rect.isEmpty) {
-                            words.add(Word(text, RectF(rect), line, fromImage = true))
+                        // Arabic words get lower confidence scores even when correct, so they use a lower bar.
+                        val minConf = if (text != null && Word.isRtl(text)) MIN_CONFIDENCE_RTL else MIN_CONFIDENCE
+                        if (!text.isNullOrEmpty() && conf >= minConf && rect != null && !rect.isEmpty) {
+                            words.add(Word(text, RectF(rect), line, para, fromImage = true))
                         }
                     } while (it.next(TessBaseAPI.PageIteratorLevel.RIL_WORD))
                 } finally {
