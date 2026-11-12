@@ -137,6 +137,32 @@
             android:text="After enabling a tile, pull down Quick Settings, tap the edit (pencil) button and drag the tile into place."
             android:textAppearance="?attr/textAppearanceBodySmall" />
 
+        <!-- Shortcuts -->
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Shortcuts" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="The ⚡ button on the selection bar runs the starred (★) shortcut. Long-press it to pick another one. Tap a shortcut below to make it the default, move it up or delete it."
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <LinearLayout
+            android:id="@+id/shortcutList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/addShortcut"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Add shortcut" />
+
         <!-- Recognition -->
         <TextView
             style="@style/SectionTitle"

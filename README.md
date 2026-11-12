@@ -16,6 +16,20 @@ Long-press a thin strip at the bottom edge of the screen, then tap or circle any
 - The glowing bar under the selection offers **Copy**, **Share**, **Sentence → Paragraph**
   (grows the selection step by step) and **All** (every word on the screen). On narrow screens or with large fonts the bar shows icons only; long-press an icon to see its name.
 
+## Shortcuts (⚡ button)
+
+Tap ⚡ on the selection bar to run the starred shortcut; long-press it to pick another.
+Manage shortcuts in the app's settings (add, make default, move up, delete).
+
+- **Smart action** (default): finds phone numbers (Call / WhatsApp), emails, links and addresses
+  in the selection using Android's on-device text classifier.
+- **App text action**: sends the text to another app's text action (Translate, AI assistant, dictionary).
+- **Share directly** to a chosen app.
+- **Links**: Search Google, Search IMDb, or a custom link with `{text}`.
+- **Clean up & copy**: numbers only, emails & phone numbers only, join lines, or copy with a template.
+
+The app itself still has no internet permission; link and app shortcuts hand the text to the chosen app.
+
 ## Triggers
 
 | Trigger | Needs accessibility service | Notes |

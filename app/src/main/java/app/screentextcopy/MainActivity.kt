@@ -1,8 +1,11 @@
 package app.screentextcopy
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.provider.Settings
+import android.util.TypedValue
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -28,6 +31,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<TextView>(R.id.version).text = "Version ${BuildConfig.VERSION_NAME}"
+
+        findViewById<MaterialButton>(R.id.addShortcut).setOnClickListener {
+            ShortcutEditor.showAdd(this) { renderShortcuts() }
+        }
+        renderShortcuts()
         status = findViewById(R.id.serviceStatus)
         val prefs = Prefs.get(this)
 
@@ -78,6 +86,42 @@ class MainActivity : AppCompatActivity() {
             "On — long-press the bottom edge to copy text."
         } else {
             "Off — enable \"Alef_B_scan trigger\" in Accessibility settings."
+        }
+    }
+
+    /** Lists saved shortcuts; the default one is starred. Tap a row for its options. */
+    private fun renderShortcuts() {
+        val box = findViewById<LinearLayout>(R.id.shortcutList)
+        box.removeAllViews()
+        val list = ShortcutStore.load(this)
+        val def = ShortcutStore.defaultIndex(this, list.size)
+        val density = resources.displayMetrics.density
+        val ripple = TypedValue().also {
+            theme.resolveAttribute(android.R.attr.selectableItemBackground, it, true)
+        }.resourceId
+
+        if (list.isEmpty()) {
+            box.addView(TextView(this).apply { text = "No shortcuts yet." })
+        }
+        list.forEachIndexed { i, s ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(0, (10 * density).toInt(), 0, (10 * density).toInt())
+                setBackgroundResource(ripple)
+                isClickable = true
+                setOnClickListener { ShortcutEditor.showOptions(this@MainActivity, i) { renderShortcuts() } }
+            }
+            row.addView(TextView(this).apply {
+                text = if (i == def) "★  ${s.name}" else s.name
+                textSize = 16f
+                setTypeface(typeface, if (i == def) Typeface.BOLD else Typeface.NORMAL)
+            })
+            row.addView(TextView(this).apply {
+                text = s.describe()
+                textSize = 13f
+                alpha = 0.7f
+            })
+            box.addView(row)
         }
     }
 

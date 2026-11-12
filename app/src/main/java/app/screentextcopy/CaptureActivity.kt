@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.concurrent.Executors
 
 /**
@@ -198,6 +199,13 @@ class CaptureActivity : AppCompatActivity() {
         expandButton = actionButton("Sentence", R.drawable.ic_action_sentence) { expandSelection() }
         bar.addView(expandButton)
         bar.addView(actionButton("All", R.drawable.ic_action_select_all) { selectionView.selectAll() })
+        // Tap runs the default (starred) shortcut; long-press chooses another one.
+        shortcutButton = actionButton("Smart", R.drawable.ic_action_shortcut) { runDefaultShortcut() }
+        shortcutButton.setOnLongClickListener {
+            pickShortcut()
+            true
+        }
+        bar.addView(shortcutButton)
         actionBar = bar
         root.addView(bar, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -233,12 +241,56 @@ class CaptureActivity : AppCompatActivity() {
             ellipsize = TextUtils.TruncateAt.END
             minWidth = dp(52)
             minimumWidth = dp(52)
+            maxWidth = dp(104)
             compoundDrawablePadding = dp(2)
             setPadding(dp(10), dp(6), dp(10), dp(6))
             setOnClickListener { action() }
             actionButtons.add(this)
             setAction(this, label, icon)
         }
+
+    // ---------- Shortcut button ----------
+
+    private lateinit var shortcutButton: Button
+
+    /** Shows the default shortcut's name on the button, or hides it if there are none. */
+    private fun refreshShortcutButton() {
+        val s = ShortcutStore.defaultShortcut(this)
+        if (s == null) {
+            shortcutButton.visibility = View.GONE
+            return
+        }
+        shortcutButton.visibility = View.VISIBLE
+        val label = if (s.type == Shortcut.TYPE_SMART) "Smart" else s.name
+        setAction(shortcutButton, label, R.drawable.ic_action_shortcut)
+        shortcutButton.tooltipText = null // long-press opens the shortcut list instead
+    }
+
+    private fun runShortcut(s: Shortcut) {
+        val text = selectionView.selectedText()
+        if (text.isBlank()) return
+        ShortcutRunner.run(this, s, text, done = { finish() }, other = { pickShortcut() })
+    }
+
+    private fun runDefaultShortcut() {
+        val s = ShortcutStore.defaultShortcut(this) ?: return pickShortcut()
+        runShortcut(s)
+    }
+
+    private fun pickShortcut() {
+        val list = ShortcutStore.load(this)
+        if (list.isEmpty()) {
+            Toast.makeText(this, "Add shortcuts in Alef_B_scan settings", Toast.LENGTH_LONG).show()
+            return
+        }
+        val def = ShortcutStore.defaultIndex(this, list.size)
+        val names = list.mapIndexed { i, s -> if (i == def) "★  ${s.name}" else s.name }.toTypedArray()
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Run shortcut")
+            .setItems(names) { _, i -> runShortcut(list[i]) }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
 
     private fun setAction(button: Button, label: String, icon: Int) {
         button.tag = label
@@ -290,6 +342,8 @@ class CaptureActivity : AppCompatActivity() {
         val margin = dp(12).toFloat()
         // The view includes a transparent glow area around the visible bar.
         val g = bar.glowSize.toFloat()
+
+        refreshShortcutButton()
 
         // Use icons with labels when they fit; on narrow screens or large fonts, icons only.
         fun measureVisibleWidth(): Float {
