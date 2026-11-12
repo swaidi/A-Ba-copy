@@ -10,6 +10,7 @@ import android.graphics.RectF
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -192,11 +193,11 @@ class CaptureActivity : AppCompatActivity() {
             setPadding(glowSize + dp(6), glowSize + dp(2), glowSize + dp(6), glowSize + dp(2))
             visibility = View.GONE
         }
-        bar.addView(barButton("Copy") { copy() })
-        bar.addView(barButton("Share") { share() })
-        expandButton = barButton("Sentence") { expandSelection() }
+        bar.addView(actionButton("Copy", R.drawable.ic_action_copy) { copy() })
+        bar.addView(actionButton("Share", R.drawable.ic_action_share) { share() })
+        expandButton = actionButton("Sentence", R.drawable.ic_action_sentence) { expandSelection() }
         bar.addView(expandButton)
-        bar.addView(barButton("All screen") { selectionView.selectAll() })
+        bar.addView(actionButton("All", R.drawable.ic_action_select_all) { selectionView.selectAll() })
         actionBar = bar
         root.addView(bar, FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -217,6 +218,45 @@ class CaptureActivity : AppCompatActivity() {
             setOnClickListener { action() }
         }
 
+    // ---------- Action buttons: icon with a one-line label, or icon only when space is tight ----------
+
+    private val actionButtons = ArrayList<Button>()
+    private var compactBar = false
+
+    private fun actionButton(label: String, icon: Int, action: () -> Unit) =
+        Button(this, null, androidx.appcompat.R.attr.borderlessButtonStyle).apply {
+            isAllCaps = false
+            setTextColor(Color.WHITE)
+            textSize = 12f
+            maxLines = 1
+            isSingleLine = true
+            ellipsize = TextUtils.TruncateAt.END
+            minWidth = dp(52)
+            minimumWidth = dp(52)
+            compoundDrawablePadding = dp(2)
+            setPadding(dp(10), dp(6), dp(10), dp(6))
+            setOnClickListener { action() }
+            actionButtons.add(this)
+            setAction(this, label, icon)
+        }
+
+    private fun setAction(button: Button, label: String, icon: Int) {
+        button.tag = label
+        button.contentDescription = label
+        button.tooltipText = label // long-press shows the name in icon-only mode
+        button.setCompoundDrawablesRelativeWithIntrinsicBounds(0, icon, 0, 0)
+        button.text = if (compactBar) "" else label
+    }
+
+    private fun setCompact(compact: Boolean) {
+        compactBar = compact
+        for (b in actionButtons) {
+            b.text = if (compact) "" else (b.tag as? String ?: "")
+            b.minWidth = if (compact) dp(48) else dp(52)
+            b.minimumWidth = b.minWidth
+        }
+    }
+
     // ---------- Step-by-step selection: word → sentence → paragraph ----------
 
     private lateinit var expandButton: Button
@@ -224,14 +264,14 @@ class CaptureActivity : AppCompatActivity() {
 
     private fun resetExpand() {
         expandLevel = 0
-        expandButton.text = "Sentence"
+        setAction(expandButton, "Sentence", R.drawable.ic_action_sentence)
         expandButton.visibility = if (selectionView.isAllSelected()) View.GONE else View.VISIBLE
     }
 
     private fun expandSelection() {
         if (expandLevel == 0 && selectionView.expandToSentence()) {
             expandLevel = 1
-            expandButton.text = "Paragraph"
+            setAction(expandButton, "Paragraph", R.drawable.ic_action_paragraph)
         } else {
             // Already a full sentence (or second tap): go to the whole paragraph.
             selectionView.expandToParagraph()
@@ -245,17 +285,27 @@ class CaptureActivity : AppCompatActivity() {
     private fun showActionBar() {
         val bounds = selectionView.selectionBounds() ?: return
         val bar = actionBar as GlowBar
-        bar.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-        // The view includes a transparent glow area around the visible bar.
-        val g = bar.glowSize.toFloat()
-        val w = bar.measuredWidth.toFloat() - 2 * g
-        val h = bar.measuredHeight.toFloat() - 2 * g
         val screenW = selectionView.width.toFloat()
         val screenH = selectionView.height.toFloat()
         val margin = dp(12).toFloat()
+        // The view includes a transparent glow area around the visible bar.
+        val g = bar.glowSize.toFloat()
+
+        // Use icons with labels when they fit; on narrow screens or large fonts, icons only.
+        fun measureVisibleWidth(): Float {
+            bar.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            )
+            return bar.measuredWidth - 2 * g
+        }
+        setCompact(false)
+        if (measureVisibleWidth() > screenW - 2 * margin) {
+            setCompact(true)
+            measureVisibleWidth()
+        }
+        val w = bar.measuredWidth.toFloat() - 2 * g
+        val h = bar.measuredHeight.toFloat() - 2 * g
 
         var y = bounds.bottom + dp(10)
         if (y + h > screenH - dp(24)) y = bounds.top - h - dp(16)

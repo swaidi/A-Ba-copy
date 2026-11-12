@@ -14,7 +14,7 @@ Long-press a thin strip at the bottom edge of the screen, then tap or circle any
 - **Tap a word** to select it, then drag the two handles to extend the selection.
 - **Circle text** to select every word the circle touches (whole words).
 - The glowing bar under the selection offers **Copy**, **Share**, **Sentence → Paragraph**
-  (grows the selection step by step) and **All screen**.
+  (grows the selection step by step) and **All** (every word on the screen). On narrow screens or with large fonts the bar shows icons only; long-press an icon to see its name.
 
 ## Triggers
 

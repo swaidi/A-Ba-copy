@@ -197,8 +197,8 @@ class SelectionView(context: Context) : View(context) {
         canvas.restore()
 
         if (hasSelection()) {
-            drawHandle(canvas, startAnchor())
-            drawHandle(canvas, endAnchor())
+            drawHandle(canvas, startAnchor(), startHandle())
+            drawHandle(canvas, endAnchor(), endHandle())
         }
 
         if (!lasso.isEmpty) {
@@ -222,14 +222,29 @@ class SelectionView(context: Context) : View(context) {
         return PointF(x * scaleX(), w.box.bottom * scaleY())
     }
 
-    private fun handleCenter(anchor: PointF) = PointF(anchor.x, anchor.y + 14 * density)
+    private val handleRadius get() = 11 * density
 
-    private fun drawHandle(canvas: Canvas, anchor: PointF) {
-        val c = handleCenter(anchor)
+    /**
+     * Handle positions lean outward from the selection (left for the start, right for the end;
+     * mirrored for Arabic), so the two handles never cover each other on a short word.
+     */
+    private fun startHandle(): PointF {
+        val a = startAnchor()
+        val outward = if (words[selStart].rtl) 1f else -1f
+        return PointF(a.x + outward * handleRadius * 0.9f, a.y + 13 * density)
+    }
+
+    private fun endHandle(): PointF {
+        val a = endAnchor()
+        val outward = if (words[selEnd].rtl) -1f else 1f
+        return PointF(a.x + outward * handleRadius * 0.9f, a.y + 13 * density)
+    }
+
+    private fun drawHandle(canvas: Canvas, anchor: PointF, c: PointF) {
         handlePaint.strokeWidth = 3 * density
         canvas.drawLine(anchor.x, anchor.y - 2 * density, c.x, c.y, handlePaint)
-        canvas.drawCircle(c.x, c.y, 11 * density, handlePaint)
-        canvas.drawCircle(c.x, c.y, 11 * density, handleRing)
+        canvas.drawCircle(c.x, c.y, handleRadius, handlePaint)
+        canvas.drawCircle(c.x, c.y, handleRadius, handleRing)
     }
 
     private fun drawEdgeGlow(canvas: Canvas) {
@@ -264,8 +279,8 @@ class SelectionView(context: Context) : View(context) {
                 mode = Mode.PENDING
                 if (hasSelection()) {
                     val grab = 30 * density
-                    val s = handleCenter(startAnchor())
-                    val e = handleCenter(endAnchor())
+                    val s = startHandle()
+                    val e = endHandle()
                     val ds = hypot(x - s.x, y - s.y)
                     val de = hypot(x - e.x, y - e.y)
                     if (ds < grab || de < grab) {
